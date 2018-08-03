@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+body {
+  font-family: 'Poiret One', cursive;
+}
+
+#canvas {
+  width: 100%;
+  height: 1000px;
+  background-color:#feb236;
+}
+
+#nim-controller {
+  margin-left: 10px;
+
+}
+
+svg {
+  float: left;
+  position: static;
+
+}
+
+rect.match {
+  fill: #a80e00dc;
+  stroke: #73c8d3;
+}
+
+.my-text {
+  font-size: 2em;
+}
+
+input[type=number]{
+    padding: 0;
+    height: 50px;
+    position: relative;
+    left: 0;
+    outline: none;
+    border-color: rgba(0,0,0,.15);
+    background-color: white;
+    font-size: 32px;
+    border:2px solid #456879;
+	  border-radius:10px;
+	  width: 80px;
+}
+
+
+
+input[type=text]{
+    padding: 0;
+    height: 50px;
+    position: relative;
+    left: 0;
+    outline: none;
+    border-color: rgba(0,0,0,.15);
+    background-color: white;
+    font-size: 32px;
+    border:2px solid #456879;
+	  border-radius:10px;
+	  width: 220px;
+}
+
+h1{
+  font-size: 2em;
+  text-align: center;
+}
+
+h2{
+  font-size: 1em;
+  text-align: center;
+
+}
+
+
+
+
+ul li{
+  font-size: 1em;
+  text-align: center;
+}
+
+
+p{
+  font-size: 1em;
+}
+
+.heap rect.selection {
+  fill: #4daf4a;
+}
+
+.error {
+  color: #e41a1c;
+}
+
+.success {
+  color: #4daf4a;
+}
+
+.button, button {
+  background-color: rgb(2, 15, 2); /* Green */
+  border: none;
+  border-radius:20px;
+
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-family: 'Poiret One', cursive;
+  display: inline-block;
+  font-size: 32px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+  
+}
+
+
+button:disabled {
+    background: rgba(221, 221, 221, 0.24);
+}
+
+.button:disabled {
+    background: rgba(221, 221, 221, 0.24);
+}

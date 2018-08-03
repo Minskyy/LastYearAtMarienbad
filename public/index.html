@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Firebase Hosting</title>
+    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/5.3.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/5.3.0/firebase-auth.js"></script>
+    <script defer src="/__/firebase/5.3.0/firebase-database.js"></script>
+    <script defer src="/__/firebase/5.3.0/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/5.3.0/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+</head>
+
+<body>
+    <div id="canvas">
+
+        <form id="frm1">
+
+            <text class="my-text"> Insira o tamanho do tabuleiro </text>
+            <br>
+            <input id="textID" type="number" name="size" min=2 max=30 pattern="/^\+?\d+$/" title="Número entre 1 e 30" placeholder="X">
+            <input type="button" class="button" onclick="submitSize()" value="Submeter">
+        </form>
+
+        <form hidden id="frm2">
+            <text class="my-text"> Jogador 1: </text>
+            <input id="name1ID" type="text" name="size" placeholder="Insira o nome">
+            <br>
+            <text class="my-text"> Jogador 2: </text>
+            <input id="name2ID" type="text" name="size" placeholder="Insira o nome">
+            <br>
+            <input type="button" class="button" onclick="submitNames()" value="Submeter">
+        </form>
+
+
+    </div>
+    <script src="app.js"></script>
+</body>
+
+
+
+</html>
