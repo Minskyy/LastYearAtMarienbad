@@ -80,7 +80,7 @@ class NimModel {
             this.currentPlayers[winner].wins++;
             this.currentPlayers[winner].playedGames++;
             this.currentPlayers[this.currentPlayer].playedGames++;
-            document.getElementById("gameCount").innerHTML = "Partidas realizadas: " + this.playedGames.length;
+            document.getElementById("gameCount").innerHTML = "Games Played: " + this.playedGames.length;
 
             this.currentGame.setWinner(this.currentPlayers[winner]);
 
@@ -287,11 +287,11 @@ class NimController {
 
         
         this.mountNode.append('h1')
-            .text("Estatísticas");
+            .text("Stats");
 
 
         this.mountNode.append('h2')
-            .html("Partidas realizadas: 0")
+            .html("Games Played: 0")
             .attr("id", "gameCount")
 
 
