@@ -1,9 +1,106 @@
-
-
 document.addEventListener("DOMContentLoaded", event => {
 
     const app = firebase.app();
+
 })
+
+
+class Data{
+
+    constructor(){
+        this.db = firebase.firestore();
+        this.collection = this.db.collection('Games');
+    }
+
+    insertGame(player1, player2, winner, moveCount) {
+        const game = this.collection.doc();
+
+
+        this.collection.get().then(function (snap){
+
+            var size = snap.size // will return the collection size
+            console.log(size);
+
+            game.set({
+                id:size,
+                player1: player1,
+                player2: player2,
+                winner: winner,
+                moveCount: moveCount
+
+
+            }).then(function () {
+                console.log("Document successfully written!");
+            })
+                .catch(function (error) {
+                    console.error("Error writing document: ", error);
+                });
+
+        });
+
+
+        
+
+    }
+
+
+
+    retrieveGames(){
+        var gamesList = document.getElementById("gamesList"); 
+        var count =0;
+        gamesList.innerText = null
+        var array = [];
+        this.collection.get().then(function (querySnapshot) {
+            querySnapshot.forEach(function (doc) {
+                // doc.data() is never undefined for query doc snapshots
+
+                var game = {
+                    id: doc.data().id,
+                    p1: doc.data().player1,
+                    p2: doc.data().player2,
+                    winner: doc.data().winner,
+                    moves: doc.data().moveCount
+                }
+
+                array.push(game);
+
+                
+                //console.log(myArray);
+                //console.log(doc.id, " => ", doc.data());
+                
+            });
+            array.sort(function (a, b) { return (a.id < b.id) ? 1 : ((b.id < a.id) ? -1 : 0); }); 
+
+            console.log(array);
+
+
+            for (let index = 0; index < array.length; index++) {
+                var option = document.createElement("option");
+                option.setAttribute("value", array[index].p1 + " vs " + array[index].p2 + ". Winner: " + array[index].winner + ". move count: " + array[index].moves);
+                option.text = array[index].id + ": " + array[index].p1 + " vs " + array[index].p2;
+                gamesList.appendChild(option);
+            }
+            
+
+            var count = querySnapshot.size;
+            console.log(count);
+            document.getElementById("gameCount").innerHTML = "Games Played: " + count + ", click a game for more info";
+
+            
+        });
+    }
+
+
+    
+    
+
+
+
+}
+
+
+
+
 
 
 
@@ -11,14 +108,14 @@ class NimModel {
 
 
 
-    constructor(numHeaps, maxHeapSize, player1, player2) {
+    constructor(numHeaps, maxHeapSize, player1, player2, database) {
         this.numHeaps = numHeaps;
         this.maxHeapSize = maxHeapSize;
         this.currentPlayer = 0;
         this.makeHeaps(this.numHeaps, this.maxHeapSize);
         this.isActive = true;
         this.currentPlayers = [];
-        this.playedGames = [];
+        this.database=database;
 
         const p1 = new Player(player1);
         const p2 = new Player(player2);
@@ -35,7 +132,7 @@ class NimModel {
         this.heaps = new Array();
         for (var i = 0; i < this.numHeaps; ++i) {
             this.heaps.push(new Array());
-            var heapSize =  2*i + 1;
+            var heapSize = 2 * i + 1;
             for (var j = 0; j < heapSize; ++j) {
                 this.heaps[i].push(j);
             }
@@ -48,12 +145,11 @@ class NimModel {
         this.isActive = true;
 
         const newGame = new Game(this.currentPlayers[0], this.currentPlayers[1]);
-        
+
         this.currentGame = newGame;
+        
+        this.database.retrieveGames();
 
-
-        console.log(this.playedGames);
-        console.log(this.currentPlayers);
     }
 
     move(selection) {
@@ -63,7 +159,7 @@ class NimModel {
                 return heap.length === 0;
             });
             if (this.isActive) {
-                ++this.currentPlayer; 
+                ++this.currentPlayer;
                 this.currentPlayer %= 2;
                 this.currentGame.moveCount++;
                 return { status: 'next_move', state: this.currentPlayer }
@@ -75,23 +171,11 @@ class NimModel {
 
             var winner = this.currentPlayer == 0 ? 1 : 0;
 
-            this.playedGames.push(this.currentGame);
-
-            this.currentPlayers[winner].wins++;
-            this.currentPlayers[winner].playedGames++;
-            this.currentPlayers[this.currentPlayer].playedGames++;
-            document.getElementById("gameCount").innerHTML = "Games Played: " + this.playedGames.length;
-
             this.currentGame.setWinner(this.currentPlayers[winner]);
 
+            this.database.insertGame(this.currentGame.player1.name, this.currentGame.player2.name, this.currentGame.winner.name, this.currentGame.moveCount);
 
 
-            var li = document.createElement('li');
-            document.getElementById("gamesList").appendChild(li);
-            li.innerHTML=this.currentGame.player1.name + " vs " + this.currentGame.player2.name + ", winner: " +  this.currentGame.winner.name + ", moves: " + this.currentGame.moveCount;
-
-
-            
             return { status: 'game_over', state: this.currentPlayer };
         }
     }
@@ -99,10 +183,10 @@ class NimModel {
 
 class NimView {
     constructor(mountNode, width, height) {
-        
+
 
         this.mountNode = d3.select(mountNode).append('svg');
-        this.width = width; 
+        this.width = width;
         this.height = height;
 
         this.currentSelection = null;
@@ -222,7 +306,7 @@ class NimView {
 
 class NimController {
     constructor(nimModel, nimView, mountNode, width, height) {
-        
+
         this.mountNode = d3.select(mountNode).append('div')
             .attr('id', 'nim-controller')
             .style('display', 'inline-block')
@@ -231,9 +315,14 @@ class NimController {
 
 
 
-        
+
         var controls = this.mountNode.append('div').style('text-align', 'center');
-        
+
+        controls.append("h1")
+        .html("Last Year At Marienbad");
+
+        controls.append("p").html("One by one, the players must remove any amount of objects from one row. The one to make the last move, loses.");
+
         controls.append("p").html("To play, highlight the objects that you would like to remove, and click move.");
 
         var status = controls.append("h2")
@@ -259,13 +348,13 @@ class NimController {
                 if (moveStatus.status === 'game_over') {
                     status.classed('success', true);
 
-                    
-                    
+
+
                     status.html(" " + (nimModel.currentGame.winner.name) + " has won!");
 
 
                     this.disabled = true;
-                    
+
                     var moveButton = this;
                     controls.append("button")
                         .attr("class", "button")
@@ -282,10 +371,10 @@ class NimController {
                         });
                 }
             });
-        
+
         this.mountNode.append('br')
 
-        
+
         this.mountNode.append('h1')
             .text("Stats");
 
@@ -295,44 +384,55 @@ class NimController {
             .attr("id", "gameCount")
 
 
-        this.mountNode.append('ul')
-            .attr("style", "list-style-type:disc")
+        this.mountNode.append('select')
             .attr("id", "gamesList")
+            .attr("class", "dropdown")
+            .attr("onChange", "check(this);")
+
+        this.mountNode.append('h2')
+            .attr("id", "gameInfo")
     }
+
+
+
+
 }
 
 
-class Player{
-    constructor(name){
+
+function check(e){
+    document.getElementById("gameInfo").innerHTML = e.options[e.selectedIndex].value;
+}
+
+class Player {
+    constructor(name) {
         this.name = name;
-        this.playedGames = 0;
-        this.wins = 0;
     }
 }
 
 
-class Game{
-    constructor(player1, player2){
+class Game {
+    constructor(player1, player2) {
         this.player1 = player1;
         this.moveCount = 1;
         this.player2 = player2;
     }
 
-    setWinner(winner){
+    setWinner(winner) {
         this.winner = winner;
     }
-    
+
 }
 
 
 function submitSize() {
 
     tableSize = document.getElementById("textID").value;
-    if (/^\+?\d+$/.test(tableSize) && tableSize <= 30 && tableSize >=2){
+    if (/^\+?\d+$/.test(tableSize) && tableSize <= 30 && tableSize >= 2) {
         document.getElementById("frm2").hidden = false;
         document.getElementById("frm1").hidden = true;
     }
-    else{
+    else {
         alert("Insira um número entre 2 e 30");
     }
 }
@@ -344,21 +444,29 @@ function submitNames() {
     document.getElementById("frm2").hidden = true;
 
     initGame();
-    
+
 }
 
 
 
 function initGame() {
 
+    const database = new Data();
+    
 
     var nimView = new NimView(document.getElementById('canvas'), 600, 500);
 
-    var nimModel = new NimModel(tableSize, 30, playerName1, playerName2);
+
+    var nimModel = new NimModel(tableSize, 30, playerName1, playerName2, database);
+
+
 
     nimView.initialize(nimModel);
-    
+
     nimView.render();
     var nimController = new NimController(nimModel, nimView,
-        document.getElementById('canvas'), 500, 500);    
+        document.getElementById('canvas'), 500, 500);
+
+
+    database.retrieveGames();
 };
