@@ -192,6 +192,7 @@ class NimView {
         this.currentSelection = null;
         this.mountNode
             .attr('width', this.width)
+            .attr("id", "gameView")
             .attr('height', this.height);
 
         this.x = d3.scaleBand().padding(0.15).range([0, this.width]);
@@ -365,9 +366,25 @@ class NimController {
                             nimView.initialize(nimModel);
                             nimView.render();
                             d3.select(this).remove();
+                            document.getElementById("confButton").parentNode.removeChild(document.getElementById("confButton"));
+
                             moveButton.disabled = false;
                             status.html("It's " + (nimModel.currentPlayers[nimModel.currentPlayer].name) + "'s move!");
                             status.classed("success", false);
+                        });
+
+
+                    controls.append("button")
+                        .attr("class", "button")
+                        .attr("id","confButton")
+                        .attr("type", "button")
+                        .text("Change configuration")
+                        .on('click', function () {
+                            document.getElementById("gameView").parentNode.removeChild(document.getElementById("gameView"));
+                            document.getElementById("nim-controller").parentNode.removeChild(document.getElementById("nim-controller"));
+                            document.getElementById("frm1").hidden = false;
+                            d3.select(this).remove();
+
                         });
                 }
             });
