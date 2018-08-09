@@ -19,7 +19,6 @@ class Data{
         this.collection.get().then(function (snap){
 
             var size = snap.size // will return the collection size
-            console.log(size);
 
             game.set({
                 id:size,
@@ -71,8 +70,8 @@ class Data{
             });
             array.sort(function (a, b) { return (a.id < b.id) ? 1 : ((b.id < a.id) ? -1 : 0); }); 
 
-            console.log(array);
 
+            
 
             for (let index = 0; index < array.length; index++) {
                 var option = document.createElement("option");
@@ -83,7 +82,7 @@ class Data{
             
 
             var count = querySnapshot.size;
-            console.log(count);
+
             document.getElementById("gameCount").innerHTML = "Games Played: " + count + ", click a game for more info";
 
             
@@ -153,15 +152,19 @@ class NimModel {
     }
 
     move(selection) {
+        //
         if (this.isActive && selection) {
             this.heaps[selection.y].splice(selection.x[0], selection.x[1] - selection.x[0]);
+            
+            // Se todos os heaps tiverem 0 blocos, isActive = false
             this.isActive = !this.heaps.every(function (heap) {
                 return heap.length === 0;
             });
+            
             if (this.isActive) {
                 ++this.currentPlayer;
-                this.currentPlayer %= 2;
-                this.currentGame.moveCount++;
+                this.currentPlayer %= 2; // alternar entre 1 e 0
+                this.currentGame.moveCount++;   
                 return { status: 'next_move', state: this.currentPlayer }
             }
         } else if (this.isActive) {
@@ -195,15 +198,17 @@ class NimView {
             .attr("id", "gameView")
             .attr('height', this.height);
 
-        this.x = d3.scaleBand().padding(0.15).range([0, this.width]);
+        this.x = d3.scaleBand().padding(0.15).range([0, this.width]); // função para dividir a width [0,600] em partes iguais, com 0.15 padding entre elas
         this.y = d3.scaleBand().range([0, this.height]);
+
+
     }
 
     initialize(nimModel) {
         var self = this;
         this.nimModel = nimModel;
         this.mountNode.selectAll('*').remove();
-        // data-driven domains
+
         var maxHeapSize = d3.max(this.nimModel.heaps, function (heap) { return d3.max(heap); }) + 1;
         var xDomain = new Array();
         for (var i = 0; i < maxHeapSize; ++i) xDomain.push(i);
@@ -213,38 +218,43 @@ class NimView {
         for (var i = 0; i < this.nimModel.numHeaps; ++i) yDomain.push(i);
         this.y.domain(yDomain);
 
-        var x = this.x;
-        var y = this.y;
+
+        var x = this.x; // função que devolve posição x para cada bloco
+        var y = this.y; // função que devolve posição y para cada bloco
         var heaps = this.nimModel.heaps;
         var heapGroups = new Array();
         var heapBrushes = new Array();
         var brushIsActive = false;
 
         this.mountNode.selectAll('g.heap')
-            .data(yDomain).enter()
+            .data(yDomain).enter() // para cada elemento do dominio de y, insere uma heap de blocos
             .append('g').attr('class', 'heap')
             .attr('width', this.width)
-            .attr('height', this.y.bandwidth())
+            .attr('height', this.y.bandwidth())  
             .attr('transform', function (d) {
-                return 'translate(0,' + y(d) + ')';
+                return 'translate(0,' + y(d) + ')'; // translada cada heap para a sua posição em y
             })
             .each(function (d, i) {
-                heapGroups.push(d3.select(this));
+                heapGroups.push(d3.select(this)); // adicionar cada grupo de heaps ao array heapgroups
+                
                 var heapBrush = d3.brushX()
-                    .extent([[0, 0], [self.width, y.bandwidth()]])
-                    .on('end', function (d) {
+                    .extent([[0, 0], [self.width, y.bandwidth()]]) // boundaries da seleção de blocos, origem(canto sup esq do bloco) até à width da svg
+                    .on('end', function (d) { // on mouseUp, invoke this function
                         if (brushIsActive) return;
                         brushIsActive = true;
-                        for (var i = 0; i < heapGroups.length; ++i) {
+                        
+                        for (var i = 0; i < heapGroups.length; ++i) {  // Prevenir que haja mais que uma seleção
                             if (i != d) {
                                 heapBrushes[i].move(heapGroups[i], null);
                             }
                         }
-                        if (d3.event.selection) {
+                        
+                        if (d3.event.selection) { // array com coordenadas [x1,x2] que representam a seleção
                             var l = -1, r = -1;
                             for (var i = 0; i < heaps[d].length; ++i) {
-                                if (l == -1 && x(i) >= d3.event.selection[0]) l = i;
-                                if (l != -1 && x(i) + x.bandwidth() <= d3.event.selection[1]) r = i + 1;
+                                if (l == -1 && x(i) >= d3.event.selection[0]) l = i; // se a seleção estiver mais à esquerda do que a posição do bloco, l=i
+                                if (l != -1 && x(i) + x.bandwidth() <= d3.event.selection[1]) r = i + 1; // se a seleçao estiver mais à direita do que a posição do bloco, r=i+1
+
                             }
                             // selected range is [l,r)
                             if (l != -1 && r != -1 && l < r) {
@@ -260,12 +270,13 @@ class NimView {
                         brushIsActive = false;
                     });
                 heapBrushes.push(heapBrush);
+                console.log(heapBrushes);
             });
         this.heapGroups = heapGroups;
         this.heapBrushes = heapBrushes;
     }
 
-    render() {
+    render() {  // chamado no inicio e de cada vez que se clica "move" ou play again
         var x = this.x;
         var y = this.y;
         var data = new Array();
@@ -416,7 +427,7 @@ class NimController {
 }
 
 
-
+// writes the info of the game in the "gameInfo" h2 tag
 function check(e){
     document.getElementById("gameInfo").innerHTML = e.options[e.selectedIndex].value;
 }
